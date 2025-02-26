@@ -9,7 +9,17 @@ module.exports = {
     "./error.vue",
   ],
   theme: {
-    extend: {},
+    extend: {
+      aspectRatio: {
+        auto: 'auto',
+        square: '1 / 1',
+        video: '16 / 9'
+      }
+    }
   },
+
   plugins: [],
+  content: [
+    'docs/content/**/*.md'
+  ]
 }

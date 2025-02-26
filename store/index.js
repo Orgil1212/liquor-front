@@ -1,3 +1,9 @@
+// server.js эсвэл index.js файлын эхэнд
+import consola from 'consola';
+
+// Түүнд гарч буй алдааг лог хийнэ
+consola.info('Төсөл амжилттай ажиллаж байна!');
+
 export const state = () => ({
     products: [],
 });

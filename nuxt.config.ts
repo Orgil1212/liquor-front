@@ -1,23 +1,27 @@
-import { defineNuxtConfig } from 'nuxt/config';
-import dotenv from 'dotenv';
+import { defineNuxtConfig } from 'nuxt/config'
+import dotenv from 'dotenv'
 
-// .env файлыг ачаалж
-dotenv.config();
+dotenv.config()
 
 export default defineNuxtConfig({
+  modules: ['@nuxt/ui'],
+  ui: {
+    global: true
+  },
   runtimeConfig: {
-    apiSecret: process.env.API_SECRET || 'default_secret_key',
     public: {
-      apiUrl: process.env.API_URL || 'http://localhost:8080',
-      publicApiKey: process.env.PUBLIC_API_KEY || 'default_public_key',
+      apiUrl: process.env.API_URL || 'http://localhost:8080', // API URL
     },
   },
-  devtools: { enabled: true },
+
   css: ['~/assets/main.css'],
+
   postcss: {
     plugins: {
       tailwindcss: {},
       autoprefixer: {},
     },
   },
-});
+
+  compatibilityDate: '2024-11-27',
+})

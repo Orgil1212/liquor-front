@@ -1,17 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import SignIn from '@/pages/signin.vue';
-import SignUp from '@/pages/signup.vue'; // Шинээр импортлох
-import Home from '@/pages/index.vue';
+import User from '@/pages/user.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home,
+    component: Home,  // Home хуудсыг импортлосон эсэхийг шалгаарай
   },
   {
     path: '/signin',
-    name: 'SignIn',
+    name: 'sign-in',
     component: SignIn,
   },
   {
@@ -19,11 +18,16 @@ const routes = [
     name: 'SignUp',
     component: SignUp,
   },
-  // Бусад маршрутууд...
+  {
+    path: '/user',
+    name: 'User',
+    component: User,
+  },
 ];
 
+
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(process.env.BASE_URL),
   routes,
 });
 
