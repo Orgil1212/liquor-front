@@ -121,6 +121,29 @@ export default {
         this.loading = false;
       }
     },
+    async handleLogin() {
+  try {
+    const response = await fetch("http://localhost:8080/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: this.email, password: this.password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.error || "Login failed!");
+
+    // ✅ LocalStorage-д user хадгалах (JSON форматтай)
+    localStorage.setItem("user", JSON.stringify({ id: data.user_id, name: data.name, email: data.email }));
+
+    // ✅ Амжилттай login хийсний дараа Home хуудас руу шилжүүлэх
+    window.location.href = "/";
+  } catch (error) {
+    this.message = error.message || "Нэвтрэхэд алдаа гарлаа!";
+    this.isError = true;
+  }
+},
+
 
     async updateProfile() {
       this.loading = true;

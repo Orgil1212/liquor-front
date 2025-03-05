@@ -13,10 +13,10 @@
       <div
         v-for="product in products"
         :key="product.id"
-        class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 transform hover:-translate-y-1 cursor-pointer"
+        class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 transform hover:-translate-y-1 cursor-pointer border border-gray-200"
       >
         <!-- Product Image -->
-        <div class="relative w-full h-52 overflow-hidden rounded-lg">
+        <div class="relative w-full h-52 overflow-hidden rounded-lg bg-gray-100">
           <img
             :src="getImageUrl(product.image)"
             alt="product image"
@@ -28,17 +28,31 @@
         <div class="mt-4">
           <h3 class="text-xl font-semibold text-gray-800">{{ product.name }}</h3>
           <p class="text-lg text-gray-600 font-medium mt-1">{{ formatPrice(product.price) }}</p>
-          <p class="text-sm text-gray-500 mt-2">{{ product.description }}</p>
+          <p class="text-sm text-gray-500 mt-2 truncate">{{ product.description }}</p>
         </div>
 
-        <!-- Action Buttons -->
-        <button
-          v-if="isAuthenticated"
-          @click="addToCart(product)"
-          class="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-lg font-medium transition-all"
-        >
-          Сагслах 🛒
-        </button>
+        <!-- Quantity Selector & Add to Cart -->
+        <div v-if="isAuthenticated" class="mt-4 flex items-center space-x-3">
+          <button 
+            @click="decreaseQuantity(product.id)"
+            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black font-bold rounded-md"
+          >-</button>
+
+          <!-- 🏆 Тоо ширхэгийг төвд нь томоор харуулах -->
+          <span class="text-xl font-bold bg-gray-200 px-4 py-2 rounded-md">{{ cartQuantities[product.id] || 1 }}</span>
+
+          <button 
+            @click="increaseQuantity(product.id)"
+            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black font-bold rounded-md"
+          >+</button>
+
+          <button
+            @click="addToCart(product)"
+            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-lg font-medium transition-all ml-2"
+          >
+            🛒 Сагслах
+          </button>
+        </div>
 
         <button
           v-else
@@ -62,6 +76,7 @@ export default {
     const products = ref([]);
     const loading = ref(true);
     const error = ref(null);
+    const cartQuantities = ref({});
 
     // 🔥 Nuxt client дээр LocalStorage-ээс хэрэглэгчийн мэдээлэл авах
     onMounted(async () => {
@@ -74,11 +89,10 @@ export default {
         console.log("📡 Бүтээгдэхүүний мэдээлэл татаж байна...");
         const response = await fetch('http://localhost:8080/api/products');
 
-        // 📌 Хэрэв backend хариу буруу бол алдаа гаргах
         if (!response.ok) throw new Error("Серверээс өгөгдөл татах үед алдаа гарлаа!");
 
         const data = await response.json();
-        console.log("✅ Амжилттай татлаа:", data); // 🔍 Debug хийх
+        console.log("✅ Амжилттай татлаа:", data);
         products.value = data;
       } catch (err) {
         error.value = err.message;
@@ -99,18 +113,33 @@ export default {
           throw new Error("Хэрэглэгчийн мэдээлэл олдсонгүй. Нэвтэрч орно уу.");
         }
 
+        const quantity = cartQuantities.value[product.id] || 1;
+
         const response = await fetch('http://localhost:8080/api/cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: user.id, product_id: product.id, quantity: 1 }),
+          body: JSON.stringify({ user_id: user.id, product_id: product.id, quantity }),
         });
 
         const result = await response.json();
 
         if (!response.ok) throw new Error(result.error || "Сагслахад алдаа гарлаа!");
-        alert(`${product.name} сагсанд нэмэгдлээ!`);
+        alert(`${product.name} (${quantity} ширхэг) сагсанд нэмэгдлээ!`);
       } catch (err) {
         alert("Алдаа: " + err.message);
+      }
+    };
+
+    const increaseQuantity = (productId) => {
+      if (!cartQuantities.value[productId]) {
+        cartQuantities.value[productId] = 1;
+      }
+      cartQuantities.value[productId]++;
+    };
+
+    const decreaseQuantity = (productId) => {
+      if (cartQuantities.value[productId] && cartQuantities.value[productId] > 1) {
+        cartQuantities.value[productId]--;
       }
     };
 
@@ -121,6 +150,9 @@ export default {
       loading,
       error,
       addToCart,
+      increaseQuantity,
+      decreaseQuantity,
+      cartQuantities,
       getImageUrl: (imagePath) => `http://localhost:8080/${imagePath}`,
       formatPrice: (price) => new Intl.NumberFormat('mn-MN', {
         style: 'currency',
@@ -131,3 +163,17 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.container {
+  max-width: 1200px;
+}
+
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+</style>

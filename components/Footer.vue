@@ -1,7 +1,7 @@
 <template>
     <footer class="bg-gray-800 p-4">
       <div class="container mx-auto text-center">
-        <p class="text-white">© {{year}} {{day}} Liquor Store. Бүх эрх хуулиар хамгаалагдсан.</p>
+        <p class="text-white">© {{year}} Liquor Store. Бүх эрх хуулиар хамгаалагдсан.</p>
       </div>
     </footer>
   </template>

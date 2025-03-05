@@ -16,31 +16,40 @@
           <a href="/about" class="text-white font-bold text-lg tracking-wider group-hover:text-red-500 transition duration-300">About Us</a>
         </li>
 
-        <!-- Хэрэв хэрэглэгч Login хийгээгүй бол "Login" товч гарна -->
+        <!-- Cart Icon (Only if Logged In) -->
+        <li v-if="isLoggedIn" class="relative">
+          <router-link to="/cart" class="relative flex items-center space-x-2 text-white font-bold text-lg tracking-wider group-hover:text-red-500 transition duration-300">
+            <ShoppingCartIcon class="w-7 h-7 text-white hover:text-red-500 transition duration-300" />
+            <span v-if="cartItemCount > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+              {{ cartItemCount }}
+            </span>
+          </router-link>
+        </li>
+
+        <!-- Login Button (If Not Logged In) -->
         <li v-if="!isLoggedIn" class="group relative">
           <router-link to="/login" class="text-white font-bold text-lg tracking-wider group-hover:text-red-500 transition duration-300">
             Login
           </router-link>
         </li>
 
-        <!-- Хэрэв хэрэглэгч Login хийсэн бол Profile icon гарч ирнэ -->
+        <!-- Profile Icon (If Logged In) -->
         <li v-else class="relative">
           <button @click="toggleDropdown" class="flex items-center space-x-2">
             <UserCircleIcon class="w-10 h-10 text-white cursor-pointer hover:text-red-500 transition duration-300" />
           </button>
 
-          <!-- Dropdown цонх -->
+          <!-- Dropdown Menu -->
           <div
             v-if="showDropdown"
             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50"
           >
-            <!-- Хэрэглэгчийн нэр, email -->
+            <!-- User Info -->
             <div class="px-4 py-2 text-gray-900 border-b">
               <p class="text-sm font-semibold">{{ user.name }}</p>
               <p class="text-xs text-gray-600">{{ user.email }}</p>
             </div>
 
-            <!-- Settings -->
             <router-link
               to="/settings"
               class="block px-4 py-2 text-sm text-gray-900 hover:bg-gray-100"
@@ -72,33 +81,56 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { UserCircleIcon } from '@heroicons/vue/24/solid' // Heroicons сангаас UserCircleIcon импортлох
+import { UserCircleIcon, ShoppingCartIcon } from '@heroicons/vue/24/solid' // Heroicons icons
 
 const router = useRouter()
 const isLoggedIn = ref(false)
 const showDropdown = ref(false)
 const user = ref({ name: '', email: '' })
+const cartItemCount = ref(0) // Stores cart count
 
-// Dropdown menu-г toggle хийх
+// Toggle Profile Dropdown
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
 }
 
-// Logout үйлдэл
+// Logout function
 const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('user')
   isLoggedIn.value = false
   user.value = { name: '', email: '' }
+  cartItemCount.value = 0 // Reset cart count
   router.push({ name: 'Home' })
 }
 
-// **Login хийсэн эсэхийг шалгах**
+// Fetch Cart Data
+const fetchCartData = async () => {
+  try {
+    const storedUser = localStorage.getItem('user')
+    if (!storedUser) return
+
+    const parsedUser = JSON.parse(storedUser)
+    isLoggedIn.value = true
+    user.value = parsedUser
+
+    const response = await fetch(`http://localhost:8080/api/cart/${parsedUser.id}`)
+    if (!response.ok) throw new Error('Failed to fetch cart data')
+
+    const cartData = await response.json()
+    cartItemCount.value = cartData.length
+  } catch (err) {
+    console.error("❌ Cart data fetch error:", err)
+  }
+}
+
+// Check login status & fetch cart data on mount
 onMounted(() => {
   const storedUser = localStorage.getItem('user')
   if (storedUser) {
     isLoggedIn.value = true
     user.value = JSON.parse(storedUser)
+    fetchCartData()
   }
 })
 </script>
@@ -109,7 +141,7 @@ nav {
   box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
 }
 
-/* Dropdown menu-ийн дизайн */
+/* Dropdown menu styling */
 div[role="menu"] {
   border-radius: 8px;
   background: white;

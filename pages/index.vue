@@ -2,156 +2,139 @@
   <div>
     <Navbar />
     <header
-      class="bg-cover bg-center h-screen text-white flex flex-col justify-center items-center"
-      style="background-image: url('@/assets/zurag/header.png');"
+      class="relative h-screen flex flex-col justify-center items-center text-white overflow-hidden bg-black"
     >
-      <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent"></div>
-      <h1 class="relative text-6xl font-extrabold mb-4 drop-shadow-2xl transform hover:scale-110 transition duration-500">
-        Welcome to Liquor Store
-      </h1>
-      <p class="relative text-xl drop-shadow-xl">Хотын хамгийн шилдэг архи, дарсыг олж мэдээрэй</p>
-      <button class="relative mt-4 px-8 py-3 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-lg transform hover:scale-110 transition duration-500">
-        Худалдаж авах
-      </button>
+      <!-- Background Slideshow -->
+      <div class="absolute inset-0 w-full h-full">
+        <transition-group name="fade" tag="div">
+          <img
+            v-for="(image, index) in images"
+            v-show="index === currentImageIndex"
+            :key="index"
+            :src="image"
+            class="absolute inset-0 w-full h-full object-cover brightness-75"
+          />
+        </transition-group>
+      </div>
+      
+      <!-- Dark Overlay -->
+      <div class="absolute inset-0 bg-black/60"></div>
+      
+      <!-- Content -->
+      <div class="relative text-center z-10 animate-fadeInUp">
+        <h1 class="text-6xl font-extrabold mb-4 drop-shadow-2xl text-white">
+          Welcome to <span class="text-red-500">Liquor Store</span>
+        </h1>
+        <p class="text-2xl drop-shadow-lg text-gray-200 max-w-2xl mx-auto">
+          Хотын хамгийн <span class="text-red-400 font-semibold">шилдэг</span>, <span class="text-yellow-400 font-semibold">онцгой</span>, <span class="text-green-400 font-semibold">шинэ</span> архи, дарсыг олж мэдээрэй
+        </p>
+        <button 
+          @click="goToProducts"
+          class="mt-6 px-10 py-4 bg-gradient-to-r from-red-600 to-red-400 text-white text-lg font-semibold rounded-full hover:from-red-700 hover:to-red-500 shadow-lg transform hover:scale-110 transition duration-500 animate-bounce"
+        >
+          Худалдаж авах
+        </button>
+      </div>
     </header>
-
-    <!-- Онцлох бүтээгдэхүүн хэсэг -->
-    <section class="py-12 bg-gradient-to-br from-gray-100 to-gray-200">
+    
+    <!-- Featured Products with Discounts and Filters -->
+    <section class="py-16 bg-gray-900 text-white">
       <div class="container mx-auto text-center">
-        <h2 class="text-5xl font-bold mb-12 drop-shadow-lg">Онцлох бүтээгдэхүүн</h2>
+        <h2 class="text-4xl font-bold mb-10 text-red-500">Онцлох бүтээгдэхүүн</h2>
+        
+        <!-- Product Filter -->
+        <div class="mb-6 flex justify-center gap-4">
+          <button @click="filterProducts('all')" class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-red-500">Бүгд</button>
+          <button @click="filterProducts('discount')" class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-red-500">Хямдралтай</button>
+          <button @click="filterProducts('premium')" class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-red-500">Тансаг</button>
+        </div>
+        
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
           <div
-            v-for="(wine, index) in wines"
+            v-for="(product, index) in filteredProducts"
             :key="index"
-            class="wine-card bg-white rounded-lg overflow-hidden transform transition duration-500 shadow-lg relative group"
+            class="bg-gray-800 rounded-lg overflow-hidden shadow-lg transition transform hover:scale-105 duration-500"
           >
-            <div class="relative">
-              <img
-                :src="wine.image"
-                :alt="wine.name"
-                class="w-full h-72 object-cover group-hover:opacity-90 transition duration-500"
-              />
-              <!-- Зургийн хүрээ -->
-              <div class="absolute inset-0 border-4 border-red-600 rounded-lg opacity-0 group-hover:opacity-100 transition duration-500"></div>
-            </div>
+            <img :src="product.image" :alt="product.name" class="w-full h-64 object-cover">
             <div class="p-6">
-              <h3 class="text-2xl font-bold mb-2">{{ wine.name }}</h3>
-              <p class="text-gray-800 mb-4">{{ wine.description }}</p>
-              <span class="text-red-600 text-3xl font-semibold">{{ wine.price }}</span>
-              <button
-                @click="showSlide(wine)"
-                class="mt-4 px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-lg transform hover:scale-105 transition duration-500"
-              >
-                Дэлгэрэнгүй
-              </button>
+              <h3 class="text-xl font-bold mb-2">{{ product.name }}</h3>
+              <p class="text-gray-300 mb-4">{{ product.description }}</p>
+              <span class="text-red-400 text-2xl font-semibold">{{ product.price }}</span>
+              <span v-if="product.discount" class="text-green-400 text-lg font-semibold ml-2">{{ product.discount }}% OFF</span>
             </div>
           </div>
         </div>
       </div>
     </section>
-
-    <Slide v-if="selectedWine" :wine="selectedWine" @close="selectedWine = null" />
+    
+    <!-- Testimonials Section -->
+    <section class="py-16 bg-black text-white">
+      <div class="container mx-auto text-center">
+        <h2 class="text-4xl font-bold mb-10 text-yellow-400">Хэрэглэгчийн сэтгэгдэл</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div v-for="(review, index) in reviews" :key="index" class="p-6 bg-gray-800 rounded-lg shadow-lg">
+            <p class="text-gray-300 mb-4">"{{ review.comment }}"</p>
+            <h4 class="text-lg font-semibold text-white">— {{ review.name }}</h4>
+            <p class="text-yellow-400">★★★★★</p>
+          </div>
+        </div>
+        
+        <!-- Add Review Form -->
+        <div class="mt-10 max-w-2xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h3 class="text-2xl font-bold mb-4 text-white">Сэтгэгдэл үлдээх</h3>
+          <input v-model="newReview.name" placeholder="Нэрээ оруулна уу" class="w-full p-2 mb-4 rounded text-black" />
+          <textarea v-model="newReview.comment" placeholder="Сэтгэгдлээ бичнэ үү" class="w-full p-2 mb-4 rounded text-black"></textarea>
+          <button @click="addReview" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Илгээх</button>
+        </div>
+      </div>
+    </section>
+    
     <Footer />
   </div>
 </template>
 
 <script setup>
-import Navbar from '@/components/Navbar.vue'
-import Footer from '~/components/Footer.vue'
-import { ref, onMounted } from 'vue'
-import Slide from '@/components/slide.vue'
+import Navbar from '@/components/Navbar.vue';
+import Footer from '@/components/Footer.vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-// Зургийг импортлох
-import wineImage1 from '@/assets/zurag/1.jpg';
-import wineImageMerlot from '@/assets/zurag/merlot.png';
-import wineImageChardonnay from '@/assets/zurag/chardonnay.png';
+const router = useRouter();
 
-const wines = ref([]);
-const selectedWine = ref(null);
-const fetchWines = async () => {
-  try {
-    const userType = "regular";
-    const productIds = [1, 2, 3];
+const goToProducts = () => {
+  router.push('/products');
+};
 
-    for (const productId of productIds) {
-      const response = await fetch(`http://localhost:8080/product?user_type=${userType}&id=${productId}`);
-      if (!response.ok) throw new Error('Network response was not ok');
+// Background Slideshow Images
+const images = [
+  '/images/icon.jpg',
+  '/images/header.jpg',
+  '/images/2.jpg'
+];
+const currentImageIndex = ref(0);
 
-      const wineData = await response.json();
-      let image;
+const changeImage = () => {
+  currentImageIndex.value = (currentImageIndex.value + 1) % images.length;
+};
 
-      if (wineData.name === "Cabernet Sauvignon") {
-        image = wineImage1;
-      } else if (wineData.name === "Merlot") {
-        image = wineImageMerlot;
-      } else if (wineData.name === "Chardonnay") {
-        image = wineImageChardonnay;
-      }
+onMounted(() => {
+  setInterval(changeImage, 5000); // Change image every 5 seconds
+});
 
-      wines.value.push({
-        name: wineData.name,
-        description: wineData.description,
-        price: wineData.price,
-        image: image,
-        userType: userType
-      });
-    }
+// Testimonials Section Data
+const reviews = ref([
+  { name: "Батбаяр", comment: "Хамгийн чанартай дарсууд энд байна!" },
+  { name: "Солонго", comment: "Хүргэлт хурдан, амт нь гайхалтай!" },
+  { name: "Энх-Амгалан", comment: "Эндээс дарс авахад хэзээ ч харамсахгүй!" },
+]);
 
-  } catch (error) {
-    console.error("Error fetching wines:", error);
+const newReview = ref({ name: '', comment: '' });
+
+const addReview = () => {
+  if (newReview.value.name && newReview.value.comment) {
+    reviews.value.push({ ...newReview.value });
+    newReview.value.name = '';
+    newReview.value.comment = '';
   }
-}
-
-const showSlide = (wine) => {
-  selectedWine.value = wine;
-}
-
-onMounted(fetchWines);
+};
 </script>
-
-<style scoped>
-/* Header хэсэг */
-header {
-  background-size: cover; /* Зургийг бүрэн харуулна */
-  background-position: center; /* Зургийг төвлөрүүлнэ */
-  position: relative; /* Байршлын хувьд үндсэн элемент болгож байна */
-}
-
-/* Hover үед opacity-г өөрчлөх */
-.group:hover .group-hover\:opacity-90 {
-  opacity: 0.9; /* 90% ил тод байна */
-}
-
-.group:hover .group-hover\:opacity-100 {
-  opacity: 1; /* 100% бүрэн харагдахуйц */
-}
-
-/* "Онцлох бүтээгдэхүүн" хэсгийн background уусгалт */
-section.bg-gradient-to-br {
-  background: linear-gradient(to bottom right, #f8fafc, #e5e7eb); /* Цайвар саарал өнгөний уусгалт */
-}
-
-/* Бүх элементийг урагш гаргаж ирэх */
-.relative > * {
-  z-index: 1;
-}
-
-/* 3D Эффекттэй карт */
-.wine-card {
-  perspective: 1000px; /* 3D харагдах өнцөг */
-}
-
-.wine-card:hover {
-  transform: rotateY(10deg) scale(1.05); /* Карт 10 градус эргэнэ, мөн 1.05 дахин томорно */
-  transition: transform 0.5s ease-in-out; /* Шилжилт нь 0.5 секунд үргэлжилнэ */
-}
-
-/* Товчлуурын hover эффектийг сайжруулна */
-button {
-  transition: transform 0.2s ease-in-out; /* Товчлуурын шилжилтийн хугацааг 0.2 секунд болгож байна */
-}
-
-button:hover {
-  transform: scale(1.05); /* Hover үед товчлуур 1.05 дахин томорно */
-}
-</style>
