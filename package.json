@@ -20,6 +20,10 @@
     "defu": "^6.1.4",
     "dotenv": "^16.4.5",
     "is-number": "^7.0.0",
+<<<<<<< HEAD
+=======
+    "jwt-decode": "^4.0.0",
+>>>>>>> e167b9c (update)
     "nuxt": "^3.14.1592",
     "vue": "latest",
     "vue-router": "latest",

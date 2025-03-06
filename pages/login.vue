@@ -33,6 +33,12 @@
 
     <!-- 🔹 ПРОФАЙЛ БҮРДҮҮЛЭХ ФОРМ -->
     <form v-else @submit.prevent="updateProfile" class="bg-white p-8 rounded-lg shadow-lg w-80">
+<<<<<<< HEAD
+=======
+      <h2>
+        
+      </h2>
+>>>>>>> e167b9c (update)
       <h2 class="text-2xl font-extrabold text-yellow-600 mb-4">User Information</h2>
       <input
         v-model="address"
@@ -73,6 +79,12 @@
 </template>
 
 <script>
+<<<<<<< HEAD
+=======
+// import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
+
+>>>>>>> e167b9c (update)
 export default {
   data() {
     return {
@@ -102,10 +114,18 @@ export default {
         if (!response.ok) {
           throw new Error(data.error || "Login failed!");
         }
+<<<<<<< HEAD
 
         // ✅ Токен болон хэрэглэгчийн мэдээллийг хадгалах
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify({ name: data.name, email: data.email }));
+=======
+        
+        // ✅ Токен болон хэрэглэгчийн мэдээллийг хадгалах
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(jwtDecode(data.token)));
+        // localStorage.setItem("user", JSON.stringify({ name: data.name, email: data.email }));
+>>>>>>> e167b9c (update)
 
         this.message = "Амжилттай нэвтэрлээ!";
         this.isError = false;
@@ -122,6 +142,7 @@ export default {
       }
     },
     async handleLogin() {
+<<<<<<< HEAD
   try {
     const response = await fetch("http://localhost:8080/api/login", {
       method: "POST",
@@ -143,6 +164,29 @@ export default {
     this.isError = true;
   }
 },
+=======
+      try {
+        const response = await fetch("http://localhost:8080/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: this.email, password: this.password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.error || "Login failed!");
+
+        // ✅ LocalStorage-д user хадгалах (JSON форматтай)
+        localStorage.setItem("user", JSON.stringify({ id: data.user_id, name: data.name, email: data.email }));
+
+        // ✅ Амжилттай login хийсний дараа Home хуудас руу шилжүүлэх
+        window.location.href = "/";
+      } catch (error) {
+        this.message = error.message || "Нэвтрэхэд алдаа гарлаа!";
+        this.isError = true;
+      }
+    },  
+>>>>>>> e167b9c (update)
 
 
     async updateProfile() {
